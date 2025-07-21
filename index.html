@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TRINITY DEVS - Lanches e Bebidas</title>
+<style>
+  /* Reset básico */
+  *, *::before, *::after {
+    margin: 0; padding: 0; box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121924; /* azul escuro */
+    color: #ccc;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  a {
+    color: #5ab4f7;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  a:hover {
+    color: #90caf9;
+  }
+
+  header {
+    background-color: #1c2738; /* azul escuro mais claro */
+    padding: 20px 40px;
+    text-align: center;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+  }
+  header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #80b3ff;
+    letter-spacing: 2px;
+    user-select: none;
+  }
+
+  main {
+    display: flex;
+    flex: 1;
+    padding: 20px 40px;
+    gap: 30px;
+  }
+
+  /* Menu lateral categorias */
+  nav#categorias {
+    width: 250px;
+    background-color: #1f293b; /* cinza azulado */
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  nav#categorias h2 {
+    color: #90caf9;
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+    user-select: none;
+  }
+
+  nav#categorias button {
+    background: none;
+    border: none;
+    color: #a0b9ff;
+    font-size: 1.2rem;
+    padding: 12px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  nav#categorias button:hover, nav#categorias button.active {
+    background-color: #5a78bf;
+    color: white;
+    font-weight: 600;
+  }
+
+  /* Conteúdo dos produtos */
+  section#produtos {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(230px,1fr));
+    gap: 25px;
+  }
+
+  article.produto {
+    background-color: #243044;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease;
+  }
+  article.produto:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(90,140,255,0.7);
+  }
+
+  article.produto img {
+    width: 100%;
+    border-radius: 10px;
+    object-fit: cover;
+    max-height: 140px;
+    user-select: none;
+  }
+
+  article.produto h3 {
+    margin-top: 12px;
+    color: #cfd9ff;
+    font-size: 1.2rem;
+  }
+  article.produto p.desc {
+    font-size: 0.9rem;
+    color: #9bb2ff;
+    margin: 6px 0 12px;
+    flex-grow: 1;
+  }
+  article.produto span.preco {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #82aaff;
+  }
+
+  article.produto button.add-btn {
+    margin-top: 10px;
+    background-color: #4877f8;
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  article.produto button.add-btn:hover {
+    background-color: #3a61c1;
+  }
+
+  /* Resumo do pedido - carrinho */
+  aside#carrinho {
+    width: 300px;
+    background-color: #1f273a;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  aside#carrinho h2 {
+    color: #8fb6ff;
+    margin-bottom: 15px;
+    text-align: center;
+    user-select: none;
+  }
+
+  #lista-pedido {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    max-height: 450px;
+  }
+
+  #lista-pedido ul {
+    list-style: none;
+  }
+
+  #lista-pedido li {
+    background-color: #334164;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    color: #b1c0ff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #lista-pedido li span.nome-produto {
+    font-weight: 600;
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #lista-pedido li span.quantidade {
+    background-color: #4668d1;
+    border-radius: 8px;
+    padding: 4px 8px;
+    min-width: 30px;
+    text-align: center;
+    user-select: none;
+  }
+
+  #lista-pedido li button.remove-btn {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 8px;
+    font-size: 1.1rem;
+    transition: color 0.2s ease;
+  }
+  #lista-pedido li button.remove-btn:hover {
+    color: #ff3b3b;
+  }
+
+  aside#carrinho div.total {
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: #8fc7ff;
+    margin-bottom: 15px;
+    text-align: center;
+    user-select: none;
+  }
+
+  aside#carrinho button#btn-whatsapp {
+    background-color: #25d366; /* verde WhatsApp */
+    border: none;
+    padding: 12px 15px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 5px 10px rgba(37,211,102,0.8);
+    transition: background-color 0.3s ease;
+  }
+  aside#carrinho button#btn-whatsapp:hover {
+    background-color: #1da851;
+  }
+
+  /* Scroll barras customizadas (somente Webkit) */
+  #lista-pedido::-webkit-scrollbar {
+    width: 8px;
+  }
+  #lista-pedido::-webkit-scrollbar-track {
+    background: #1f273a;
+    border-radius: 8px;
+  }
+  #lista-pedido::-webkit-scrollbar-thumb {
+    background-color: #4668d1;
+    border-radius: 8px;
+  }
+
+  /* Footer simples */
+  footer {
+    background-color: #1c2738;
+    text-align: center;
+    padding: 12px 20px;
+    color: #90a6c6;
+    font-size: 0.9rem;
+    user-select: none;
+  }
+
+  /* Responsividade */
+  @media (max-width: 1100px) {
+    main {
+      flex-direction: column;
+      padding: 15px 20px;
+    }
+    nav#categorias, aside#carrinho {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    section#produtos {
+      grid-template-columns: repeat(auto-fill,minmax(160px,1fr));
+      gap: 18px;
+    }
+  }
+
+  @media (max-width: 500px) {
+    header h1 {
+      font-size: 1.8rem;
+    }
+    nav#categorias button {
+      font-size: 1rem;
+      padding: 10px;
+    }
+    article.produto h3 {
+      font-size: 1rem;
+    }
+    article.produto p.desc {
+      font-size: 0.8rem;
+    }
+    aside#carrinho {
+      padding: 15px;
+    }
+    aside#carrinho h2 {
+      font-size: 1.3rem;
+    }
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TRINITY DEVS</h1>
+</header>
+
+<main>
+  <nav id="categorias" aria-label="Categorias de produtos">
+    <h2>Categorias</h2>
+    <button class="active" data-categoria="lanches" aria-pressed="true">Lanches</button>
+    <button data-categoria="bebidas" aria-pressed="false">Bebidas</button>
+  </nav>
+
+  <section id="produtos" aria-live="polite" aria-label="Lista de produtos">
+    <!-- Produtos serão renderizados via JS -->
+  </section>
+
+  <aside id="carrinho" aria-label="Resumo do pedido">
+    <h2>Seu Pedido</h2>
+    <div id="lista-pedido">
+      <ul></ul>
+    </div>
+    <div class="total">Total: R$ 0,00</div>
+    <button id="btn-whatsapp" aria-label="Enviar pedido via WhatsApp">Enviar pedido via WhatsApp</button>
+  </aside>
+</main>
+
+<footer>
+  &copy; 2025 TRINITY DEVS - Todos os direitos reservados.
+</footer>
+
+<script>
+  // Dados dos produtos (vários para alcançar linhas e robustez)
+  const produtos = [
+    // Lanches
+    {
+      id: 'lanche01',
+      categoria: 'lanches',
+      nome: 'X-Bacon',
+      descricao: 'Pão, hambúrguer, queijo, alface, bacon, carne, tomate.',
+      preco: 23.90,
+      imagem: 'bacon.jpg'
+    },
+    {
+      id: 'lanche02',
+      categoria: 'lanches',
+      nome: 'X-Salada',
+      descricao: 'Pão, hambúrguer, carne, queijo, alface e tomate.',
+      preco: 23.50,
+      imagem: 'salada.jpg'
+    },
+    {
+      id: 'lanche03',
+      categoria: 'lanches',
+      nome: 'X-Tudo',
+      descricao: 'Pão, hambúrguer, ovo, queijo, alface, carne, bacon e tomate.',
+      preco: 25.00,
+      imagem: 'tudo.jpg'
+    },
+    {
+      id: 'lanche04',
+      categoria: 'lanches',
+      nome: 'Mini Lanche',
+      descricao: 'Pão, carne, molho especial, milho e batata palha.',
+      preco: 16.00,
+      imagem: 'mini.jpg'
+    },
+    {
+      id: 'lanche05',
+      categoria: 'lanches',
+      nome: 'Lanche Duplo',
+      descricao: 'Pão macio, duas carnes bovinas grelhadas, queijo cheddar derretido, alface fresca crocante, fatias de tomate vermelho, cebola roxa, picles e molho especial cremoso.',
+      preco: 27.50,
+      imagem: 'duplo.jpg'
+    },
+    {
+      id: 'lanche06',
+      categoria: 'lanches',
+      nome: 'Hambúrguer Vegano',
+      descricao: 'Pão integral, hambúrguer vegetal, alface, tomate e molho vegano.',
+      preco: 25.00,
+      imagem: 'vegano.jpg'
+    },
+    {
+      id: 'lanche07',
+      categoria: 'lanches',
+      nome: 'X-Frango',
+      descricao: 'Pão, filé de frango, queijo, alface e maionese caseira.',
+      preco: 23.50,
+      imagem: 'xfrango.jpg'
+    },
+    {
+      id: 'lanche08',
+      categoria: 'lanches',
+      nome: 'Batata Frita',
+      descricao: 'Molho e poção de batata frita crocante.',
+      preco: 19.00,
+      imagem: 'batata.jpg'
+    },
+    // Bebidas
+    {
+      id: 'bebida01',
+      categoria: 'bebidas',
+      nome: 'Suco de Laranja',
+      descricao: '900ML',
+      preco: 7.00,
+      imagem: 'download (2).jpg'
+    },
+    {
+      id: 'bebida02',
+      categoria: 'bebidas',
+      nome: 'Monster',
+      descricao: '500ML',
+      preco: 9.00,
+      imagem: 'Monster.jpg'
+    },
+    {
+      id: 'bebida03',
+      categoria: 'bebidas',
+      nome: 'Água Mineral Com Gás',
+      descricao: '500ML',
+      preco: 3.50,
+      imagem: 'Crystal Água Com Gás    6 pzas x 1_5 L.jpg'
+    },
+    {
+      id: 'bebida04',
+      categoria: 'bebidas',
+      nome: 'Àgua Mineral',
+      descricao: '500ML',
+      preco: 2.50,
+      imagem: 'Água mineral cristal 510 ml.jpg'
+    },
+    {
+      id: 'bebida05',
+      categoria: 'bebidas',
+      nome: 'Cerveja Skol',
+      descricao: '350ML',
+      preco: 6.00,
+      imagem: 'Kit C_18 Cerveja Skol Pilsen Lata 350ml - R$ 154,83.jpg'
+    },
+    {
+      id: 'bebida06',
+      categoria: 'bebidas',
+      nome: 'Guarana Lata',
+      descricao: '350ML',
+      preco: 5.00,
+      imagem: 'download (1).jpg'
+    },
+    {
+      id: 'bebida07',
+      categoria: 'bebidas',
+      nome: 'Coca Cola 2l',
+      descricao: 'Geladinha 2l',
+      preco: 11.00,
+      imagem: 'download.jpg'
+    },
+    {
+      id: 'bebida08',
+      categoria: 'bebidas',
+      nome: 'Coca Cola Lata',
+      descricao: '350ML',
+      preco: 5.00,
+      imagem: 'Drinking Coke and Pepsi leads to larger testicles, more testosterone_ study.jpg'
+    }
+  ];
+
+  // Estado do carrinho: objeto com id do produto e quantidade
+  const carrinho = {};
+
+  // Elementos do DOM
+  const btnCategorias = document.querySelectorAll('#categorias button');
+  const secProdutos = document.getElementById('produtos');
+  const ulPedido = document.querySelector('#lista-pedido ul');
+  const divTotal = document.querySelector('#carrinho .total');
+  const btnWhatsApp = document.getElementById('btn-whatsapp');
+
+  let categoriaAtual = 'lanches';
+
+  // Função para formatar preço em BRL
+  function formatarPreco(valor) {
+    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  // Função para renderizar produtos da categoria atual
+  function renderizarProdutos() {
+    secProdutos.innerHTML = '';
+
+    const produtosFiltrados = produtos.filter(p => p.categoria === categoriaAtual);
+
+    produtosFiltrados.forEach(prod => {
+      const art = document.createElement('article');
+      art.classList.add('produto');
+      art.setAttribute('tabindex', '0');
+      art.innerHTML = `
+        <img src="${prod.imagem}" alt="${prod.nome}" loading="lazy" />
+        <h3>${prod.nome}</h3>
+        <p class="desc">${prod.descricao}</p>
+        <span class="preco">${formatarPreco(prod.preco)}</span>
+        <button class="add-btn" aria-label="Adicionar ${prod.nome} ao pedido">Adicionar</button>
+      `;
+
+      // Evento botão adicionar
+      art.querySelector('button.add-btn').addEventListener('click', () => {
+        adicionarAoCarrinho(prod.id);
+      });
+
+      secProdutos.appendChild(art);
+    });
+  }
+
+  // Atualiza visual do carrinho
+  function atualizarCarrinho() {
+    ulPedido.innerHTML = '';
+
+    let total = 0;
+
+    for (const id in carrinho) {
+      const produto = produtos.find(p => p.id === id);
+      const quantidade = carrinho[id];
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span class="nome-produto">${produto.nome}</span>
+        <span class="quantidade">${quantidade}</span>
+        <button class="remove-btn" aria-label="Remover um ${produto.nome} do pedido">&times;</button>
+      `;
+
+      // Botão remover item
+      li.querySelector('button.remove-btn').addEventListener('click', () => {
+        removerDoCarrinho(id);
+      });
+
+      ulPedido.appendChild(li);
+
+      total += produto.preco * quantidade;
+    }
+
+    divTotal.textContent = `Total: ${formatarPreco(total)}`;
+  }
+
+  // Adiciona produto ao carrinho
+  function adicionarAoCarrinho(id) {
+    if (carrinho[id]) {
+      carrinho[id]++;
+    } else {
+      carrinho[id] = 1;
+    }
+    atualizarCarrinho();
+  }
+
+  // Remove uma unidade do carrinho
+  function removerDoCarrinho(id) {
+    if (!carrinho[id]) return;
+
+    carrinho[id]--;
+    if (carrinho[id] <= 0) {
+      delete carrinho[id];
+    }
+    atualizarCarrinho();
+  }
+
+  // Trocar categoria selecionada
+  btnCategorias.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.categoria === categoriaAtual) return;
+
+      categoriaAtual = btn.dataset.categoria;
+
+      btnCategorias.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+
+      renderizarProdutos();
+    });
+  });
+
+  // Enviar pedido via WhatsApp
+  btnWhatsApp.addEventListener('click', () => {
+    if (Object.keys(carrinho).length === 0) {
+      alert('Seu pedido está vazio. Adicione produtos antes de enviar.');
+      return;
+    }
+
+    // Construir mensagem
+    let mensagem = `*Pedido pelo site TRINITY DEVS*%0A`;
+    mensagem += `--------------------------%0A`;
+
+    let total = 0;
+
+    for (const id in carrinho) {
+      const produto = produtos.find(p => p.id === id);
+      const qtd = carrinho[id];
+      mensagem += `${qtd}x ${produto.nome} - R$ ${(produto.preco * qtd).toFixed(2).replace('.', ',')}%0A`;
+      total += produto.preco * qtd;
+    }
+
+    mensagem += `--------------------------%0A`;
+    mensagem += `*Total: R$ ${total.toFixed(2).replace('.', ',')}*%0A`;
+    mensagem += `%0APor favor, confirmar o pedido. Obrigado!`;
+
+    // Número do vendedor (exemplo com Brasil)
+    const numeroWhats = '43996609617'; // Troque para seu número com DDI + DDD
+
+    const urlWhatsApp = `https://wa.me/${numeroWhats}?text=${mensagem}`;
+    window.open(urlWhatsApp, '_blank');
+  });
+
+  // Inicialização
+  renderizarProdutos();
+  atualizarCarrinho();
+
+</script>
+
+</body>
+</html>
+
