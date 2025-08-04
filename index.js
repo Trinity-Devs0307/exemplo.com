@@ -7,7 +7,12 @@ const produtos = [
     preco: 23.90,
     imagem: 'bacon.jpg',
     ingredientes: ['Queijo', 'Alface', 'Bacon', 'Carne', 'Tomate'],
-    adicionais: ['Queijo', 'Carne', 'Cheddar','Cebola Roxa']
+    adicionais: {
+      'Queijo': 8,
+      'Carne': 10,
+      'Cheddar': 5,
+      'Cebola Roxa': 4
+    }
   },
   {
     id: 'lanche02',
@@ -17,7 +22,12 @@ const produtos = [
     preco: 23.50,
     imagem: 'salada.jpg',
     ingredientes: ['Carne', 'Queijo', 'Alface', 'Tomate'],
-    adicionais: ['Queijo', 'Carne', 'Cheddar','Cebola Roxa']
+    adicionais: {
+      'Queijo': 8,
+      'Carne': 10,
+      'Cheddar': 5,
+      'Cebola Roxa': 4
+    }
   },
   {
     id: 'lanche03',
@@ -27,7 +37,12 @@ const produtos = [
     preco: 25.00,
     imagem: 'tudo.jpg',
     ingredientes: ['Ovo', 'Queijo', 'Alface', 'Carne', 'Bacon', 'Tomate'],
-    adicionais: ['Queijo', 'Carne', 'Cheddar','Cebola Roxa']
+    adicionais: {
+      'Queijo': 8,
+      'Carne': 10,
+      'Cheddar': 5,
+      'Cebola Roxa': 4
+    }
   },
   {
     id: 'lanche04',
@@ -37,7 +52,12 @@ const produtos = [
     preco: 16.00,
     imagem: 'mini.jpg',
     ingredientes: ['Carne', 'Molho especial', 'Milho', 'Batata palha'],
-    adicionais: ['Queijo', 'Carne', 'Cheddar','Cebola Roxa']
+    adicionais: {
+      'Queijo': 8,
+      'Carne': 10,
+      'Cheddar': 5,
+      'Cebola Roxa': 4
+    }
   },
   {
     id: 'lanche05',
@@ -47,7 +67,12 @@ const produtos = [
     preco: 27.50,
     imagem: 'duplo.jpg',
     ingredientes: ['Carne', 'Queijo cheddar', 'Alface', 'Tomate', 'Cebola roxa', 'Picles', 'Molho'],
-    adicionais: ['Queijo', 'Carne', 'Cheddar','Cebola Roxa']
+    adicionais: {
+      'Queijo': 8,
+      'Carne': 10,
+      'Cheddar': 5,
+      'Cebola Roxa': 4
+    }
   },
   {
     id: 'lanche06',
@@ -57,7 +82,12 @@ const produtos = [
     preco: 25.00,
     imagem: 'vegano.jpg',
     ingredientes: ['Hambúrguer vegetal', 'Alface', 'Tomate', 'Molho vegano'],
-    adicionais: ['Queijo', 'Carne', 'Cheddar','Cebola Roxa']
+    adicionais: {
+      'Queijo': 8,
+      'Carne': 10,
+      'Cheddar': 5,
+      'Cebola Roxa': 4
+    }
   },
   {
     id: 'lanche07',
@@ -67,7 +97,12 @@ const produtos = [
     preco: 23.50,
     imagem: 'xfrango.jpg',
     ingredientes: ['Filé de frango', 'Queijo', 'Alface', 'Maionese caseira'],
-    adicionais: ['Queijo', 'Carne', 'Cheddar','Cebola Roxa']
+    adicionais: {
+      'Queijo': 8,
+      'Carne': 10,
+      'Cheddar': 5,
+      'Cebola Roxa': 4
+    }
   },
   {
     id: 'lanche08',
@@ -76,8 +111,7 @@ const produtos = [
     descricao: 'Molho e poção de batata frita crocante.',
     preco: 19.00,
     imagem: 'batata.jpg',
-    ingredientes: ['Molho'],
-    adicionais: ['Queijo', 'Carne', 'Cheddar','Cebola Roxa']
+    ingredientes: ['Molho']
   },
   {
     id: 'bebida01',
@@ -149,9 +183,9 @@ const carrinho = {}; // id => { qtd, sem: [], obs: "", adicionais: [] }
 
 const btnCategorias = document.querySelectorAll('#categorias button');
 const secProdutos = document.getElementById('produtos');
-const ulPedido = document.querySelector('#lista-pedido ul');
-const divTotal = document.querySelector('#carrinho .total');
-const btnWhatsApp = document.getElementById('btn-whatsapp');
+const divTotal = document.querySelector('#carrinho-flutuante .total');
+const btnWhatsApp = document.querySelector('#carrinho-flutuante #btn-whatsapp');
+const ulCarrinho = document.getElementById('lista-carrinho');
 
 let categoriaAtual = 'lanches';
 
@@ -204,9 +238,15 @@ function abrirPersonalizacao(prod) {
   let adicionaisHTML = '';
   if (prod.adicionais) {
     adicionaisHTML += '<p>Adicionais (+R$ 2,00 cada):</p>';
-    prod.adicionais.forEach(add => {
-      adicionaisHTML += `<label><input type="checkbox" value="${add}"> ${add}</label>`;
-    });
+    for (const nome in prod.adicionais) {
+      const limite = prod.adicionais[nome];
+      adicionaisHTML += `
+        <label style="display:block; margin-bottom:4px;">
+          ${nome} (máx. ${limite}): 
+          <input type="number" min="0" max="${limite}" value="0" data-nome="${nome}" />
+        </label>
+      `;
+    }
   }
 
   box.innerHTML = `
@@ -239,13 +279,27 @@ function abrirPersonalizacao(prod) {
 
   box.querySelector('.confirmar').addEventListener('click', () => {
     const sem = Array.from(box.querySelectorAll('#remover input:checked')).map(e => e.value);
-    const adicionais = Array.from(box.querySelectorAll('#adicionar input:checked')).map(e => e.value);
+    const adicionais = [];
+    box.querySelectorAll('#adicionar input[type="number"]').forEach(input => {
+      const qtd = parseInt(input.value);
+      if (qtd > 0) {
+        adicionais.push({ nome: input.dataset.nome, qtd });
+      }
+    });
+    
     const obs = box.querySelector('#obs').value.trim();
 
     if (!carrinho[prod.id]) {
       carrinho[prod.id] = { qtd: 1, sem, obs, adicionais };
     } else {
       carrinho[prod.id].qtd++;
+      carrinho[prod.id].sem.push(...sem);
+      carrinho[prod.id].obs += (obs ? ` + ${obs}` : '');
+      adicionais.forEach(add => {
+        const existente = carrinho[prod.id].adicionais.find(a => a.nome === add.nome);
+        if (existente) existente.qtd += add.qtd;
+        else carrinho[prod.id].adicionais.push(add);
+      });
     }
 
     atualizarCarrinho();
@@ -256,32 +310,47 @@ function abrirPersonalizacao(prod) {
 }
 
 function atualizarCarrinho() {
-  ulPedido.innerHTML = '';
+  ulCarrinho.innerHTML = '';
   let total = 0;
 
   for (const id in carrinho) {
     const prod = produtos.find(p => p.id === id);
     const { qtd, adicionais = [] } = carrinho[id];
-    const adicionalTotal = adicionais.length * 2 * qtd;
-
+  
+    let adicionalTotal = 0;
+    for (const add of adicionais) {
+      adicionalTotal += add.qtd * 2;
+    }
+  
+    total += (prod.preco * qtd) + adicionalTotal;
+  
     const li = document.createElement('li');
+  
+    let descricao = `${qtd}x ${prod.nome}`;
+    if (adicionais.length) {
+      const listaAdicionais = adicionais.map(a => `${a.qtd}x ${a.nome}`).join(', ');
+      descricao += ` (+ ${listaAdicionais})`;
+    }
+  
     li.innerHTML = `
-      <span class="nome-produto">${prod.nome}</span>
-      <span class="quantidade">${qtd}</span>
-      <button class="remove-btn">&times;</button>
+      <span>${descricao}</span>
+      <button class="remove-btn" style="background:none;border:none;color:#c00;cursor:pointer;">×</button>
     `;
+
     li.querySelector('.remove-btn').addEventListener('click', () => {
       carrinho[id].qtd--;
       if (carrinho[id].qtd <= 0) delete carrinho[id];
       atualizarCarrinho();
     });
-
-    ulPedido.appendChild(li);
-    total += (prod.preco * qtd) + adicionalTotal;
+  
+    ulCarrinho.appendChild(li);
   }
+  
 
   divTotal.textContent = `Total: ${formatarPreco(total)}`;
 }
+
+
 
 btnCategorias.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -331,7 +400,7 @@ btnWhatsApp.addEventListener('click', () => {
       const { qtd, sem = [], obs = "", adicionais = [] } = carrinho[id];
       let linha = `${qtd}x ${prod.nome}`;
       if (sem.length) linha += ` (sem: ${sem.join(', ')})`;
-      if (adicionais.length) linha += ` (+ ${adicionais.join(', ')})`;
+      linha += ` (+ ${adicionais.map(a => `${a.qtd}x ${a.nome}`).join(', ')})`;
       if (obs) linha += ` [Obs: ${obs}]`;
 
       const valor = prod.preco * qtd + (adicionais.length * 2 * qtd);
