@@ -420,3 +420,60 @@ btnWhatsApp.addEventListener('click', () => {
 
 renderizarProdutos();
 atualizarCarrinho();
+
+(function tornarArrastavel() {
+  const carrinho = document.getElementById('carrinho-flutuante');
+  let isDragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  function onMouseDown(e) {
+    isDragging = true;
+    carrinho.classList.add('dragging');
+    const rect = carrinho.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+    e.preventDefault();
+  }
+
+  function onTouchStart(e) {
+    isDragging = true;
+    carrinho.classList.add('dragging');
+    const touch = e.touches[0];
+    const rect = carrinho.getBoundingClientRect();
+    offsetX = touch.clientX - rect.left;
+    offsetY = touch.clientY - rect.top;
+  }
+
+  function onMouseMove(e) {
+    if (!isDragging) return;
+    carrinho.style.left = `${e.clientX - offsetX}px`;
+    carrinho.style.top = `${e.clientY - offsetY}px`;
+    carrinho.style.right = 'auto';
+    carrinho.style.bottom = 'auto';
+  }
+
+  function onTouchMove(e) {
+    if (!isDragging) return;
+    const touch = e.touches[0];
+    carrinho.style.left = `${touch.clientX - offsetX}px`;
+    carrinho.style.top = `${touch.clientY - offsetY}px`;
+    carrinho.style.right = 'auto';
+    carrinho.style.bottom = 'auto';
+  }
+
+  function stopDragging() {
+    isDragging = false;
+    carrinho.classList.remove('dragging');
+  }
+
+  // Eventos para mouse
+  carrinho.addEventListener('mousedown', onMouseDown);
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', stopDragging);
+
+  // Eventos para toque
+  carrinho.addEventListener('touchstart', onTouchStart);
+  document.addEventListener('touchmove', onTouchMove);
+  document.addEventListener('touchend', stopDragging);
+})();

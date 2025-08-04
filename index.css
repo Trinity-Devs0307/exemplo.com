@@ -415,6 +415,11 @@
   flex-direction: column;
   gap: 12px;
   border: 1px solid #ccc;
+  cursor: grab;
+}
+
+#carrinho-flutuante.dragging {
+  cursor: grabbing;
 }
 
 #carrinho-flutuante h3 {
